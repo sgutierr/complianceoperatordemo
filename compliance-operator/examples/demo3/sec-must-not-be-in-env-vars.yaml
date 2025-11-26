@@ -1,0 +1,35 @@
+apiVersion: compliance.openshift.io/v1alpha1
+kind: CustomRule
+metadata:
+  name: secrets-must-not-be-in-env-vars
+  namespace: openshift-compliance
+spec:
+  title: Environment variables should not contain long base64-like values
+  description: |-
+    Detects environment variables with long base64-encoded values that might
+    be secrets hardcoded instead of using valueFrom.secretKeyRef. This is a
+    heuristic check - secrets should always use valueFrom.secretKeyRef.
+  failureReason: |-
+    One or more pods have environment variables with long base64-like values
+    that might be secrets. Use valueFrom.secretKeyRef instead.
+  severity: high
+  id: secrets_must_not_be_in_env_vars
+  checkType: Platform
+  scannerType: CEL
+  inputs:
+    - name: pods
+      kubernetesInputSpec:
+        apiVersion: v1
+        resource: pods
+  expression: |
+    pods.items.all(pod,
+      pod.spec.containers.all(container,
+        !has(container.env) ||
+        container.env.all(envVar,
+          !has(envVar.value) ||
+          size(envVar.value) < 40 ||
+          !envVar.value.matches('^[A-Za-z0-9+/=]{40,}$')
+        )
+      )
+    )
+
