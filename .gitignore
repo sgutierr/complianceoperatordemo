@@ -1,0 +1,25 @@
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Temporary files
+*.tmp
+*.log
+*.bak
+
+# Kubernetes secrets (if any)
+*secret*.yaml
+*secret*.yml
+
+# Local environment files
+.env
+.env.local
+
