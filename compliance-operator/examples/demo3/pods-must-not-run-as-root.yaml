@@ -1,0 +1,40 @@
+apiVersion: compliance.openshift.io/v1alpha1
+kind: CustomRule
+metadata:
+  name: pods-must-not-run-as-root
+  namespace: openshift-compliance
+spec:
+  title: Pods must not run as root user
+  description: |-
+    Ensures that containers do not run as root user (UID 0) to follow
+    the principle of least privilege and reduce security risks.
+  failureReason: |-
+    One or more containers are configured to run as root user (UID 0).
+  severity: high
+  id: pods_must_not_run_as_root
+  checkType: Platform
+  scannerType: CEL
+  inputs:
+    - name: pods
+      kubernetesInputSpec:
+        apiVersion: v1
+        resource: pods
+  expression: |
+    pods.items.all(pod,
+      (
+        !has(pod.spec.securityContext) ||
+        !has(pod.spec.securityContext.runAsUser) ||
+        pod.spec.securityContext.runAsUser != 0
+      ) &&
+      pod.spec.containers.all(container,
+        !has(container.securityContext) ||
+        !has(container.securityContext.runAsUser) ||
+        container.securityContext.runAsUser != 0
+      ) &&
+      pod.spec.initContainers.all(container,
+        !has(container.securityContext) ||
+        !has(container.securityContext.runAsUser) ||
+        container.securityContext.runAsUser != 0
+      )
+    )
+

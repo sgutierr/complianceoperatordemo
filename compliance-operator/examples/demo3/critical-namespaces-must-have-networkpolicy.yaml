@@ -1,0 +1,39 @@
+apiVersion: compliance.openshift.io/v1alpha1
+kind: CustomRule
+metadata:
+  name: critical-namespaces-must-have-networkpolicy
+  namespace: openshift-compliance
+spec:
+  title: Critical namespaces must have NetworkPolicy defined
+  description: |-
+    Ensures that critical namespaces have at least one NetworkPolicy defined
+    to enforce network segmentation and security boundaries.
+  failureReason: |-
+    One or more critical namespaces do not have NetworkPolicy defined.
+  severity: high
+  id: critical_namespaces_must_have_networkpolicy
+  checkType: Platform
+  scannerType: CEL
+  inputs:
+    - name: namespaces
+      kubernetesInputSpec:
+        apiVersion: v1
+        resource: namespaces
+    - name: networkpolicies
+      kubernetesInputSpec:
+        apiVersion: networking.k8s.io/v1
+        resource: networkpolicies
+  expression: |
+    namespaces.items.filter(ns,
+      ns.metadata.name in [
+        'kube-system',
+        'openshift-monitoring',
+        'openshift-ingress',
+        'openshift-authentication'
+      ]
+    ).all(ns,
+      networkpolicies.items.exists(np,
+        np.metadata.namespace == ns.metadata.name
+      )
+    )
+

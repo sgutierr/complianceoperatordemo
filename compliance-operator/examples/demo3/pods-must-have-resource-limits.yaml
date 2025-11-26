@@ -1,0 +1,37 @@
+apiVersion: compliance.openshift.io/v1alpha1
+kind: CustomRule
+metadata:
+  name: pods-must-have-resource-limits
+  namespace: openshift-compliance
+spec:
+  title: Pods must have resource limits defined
+  description: |-
+    Ensures that all containers have resource limits (CPU and memory) defined
+    to prevent resource exhaustion and ensure fair resource allocation.
+  failureReason: |-
+    One or more containers are missing resource limits (CPU or memory).
+  severity: medium
+  id: pods_must_have_resource_limits
+  checkType: Platform
+  scannerType: CEL
+  inputs:
+    - name: pods
+      kubernetesInputSpec:
+        apiVersion: v1
+        resource: pods
+  expression: |
+    pods.items.all(pod,
+      pod.spec.containers.all(container,
+        has(container.resources) &&
+        has(container.resources.limits) &&
+        has(container.resources.limits.cpu) &&
+        has(container.resources.limits.memory)
+      ) &&
+      pod.spec.initContainers.all(container,
+        has(container.resources) &&
+        has(container.resources.limits) &&
+        has(container.resources.limits.cpu) &&
+        has(container.resources.limits.memory)
+      )
+    )
+

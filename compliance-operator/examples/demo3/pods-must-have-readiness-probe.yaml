@@ -1,0 +1,33 @@
+apiVersion: compliance.openshift.io/v1alpha1
+kind: CustomRule
+metadata:
+  name: pods-must-have-readiness-probe
+  namespace: openshift-compliance
+spec:
+  title: Pods must have readiness probes configured
+  description: |-
+    Ensures that all containers have readiness probes configured to enable
+    proper traffic routing and prevent serving traffic to unhealthy containers.
+  failureReason: |-
+    One or more containers are missing readiness probes.
+  severity: medium
+  id: pods_must_have_readiness_probe
+  checkType: Platform
+  scannerType: CEL
+  inputs:
+    - name: pods
+      kubernetesInputSpec:
+        apiVersion: v1
+        resource: pods
+  expression: |
+    pods.items.all(pod,
+      pod.spec.containers.all(container,
+        has(container.readinessProbe) &&
+        (
+          has(container.readinessProbe.httpGet) ||
+          has(container.readinessProbe.tcpSocket) ||
+          has(container.readinessProbe.exec)
+        )
+      )
+    )
+

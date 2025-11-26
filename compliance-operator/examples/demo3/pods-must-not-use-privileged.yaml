@@ -1,0 +1,40 @@
+apiVersion: compliance.openshift.io/v1alpha1
+kind: CustomRule
+metadata:
+  name: pods-must-not-use-privileged
+  namespace: openshift-compliance
+spec:
+  title: Pods must not run in privileged mode
+  description: |-
+    Ensures that containers do not run in privileged mode, which grants
+    almost all capabilities of the host machine and poses significant security risks.
+  failureReason: |-
+    One or more containers are running in privileged mode.
+  severity: high
+  id: pods_must_not_use_privileged
+  checkType: Platform
+  scannerType: CEL
+  inputs:
+    - name: pods
+      kubernetesInputSpec:
+        apiVersion: v1
+        resource: pods
+  expression: |
+    pods.items.all(pod,
+      (
+        !has(pod.spec.securityContext) ||
+        !has(pod.spec.securityContext.privileged) ||
+        pod.spec.securityContext.privileged == false
+      ) &&
+      pod.spec.containers.all(container,
+        !has(container.securityContext) ||
+        !has(container.securityContext.privileged) ||
+        container.securityContext.privileged == false
+      ) &&
+      pod.spec.initContainers.all(container,
+        !has(container.securityContext) ||
+        !has(container.securityContext.privileged) ||
+        container.securityContext.privileged == false
+      )
+    )
+

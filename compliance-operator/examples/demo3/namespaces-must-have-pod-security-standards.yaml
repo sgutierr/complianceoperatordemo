@@ -1,0 +1,35 @@
+apiVersion: compliance.openshift.io/v1alpha1
+kind: CustomRule
+metadata:
+  name: namespaces-must-have-pod-security-standards
+  namespace: openshift-compliance
+spec:
+  title: Namespaces must have Pod Security Standards configured
+  description: |-
+    Ensures that namespaces have Pod Security Standards labels configured
+    to enforce security policies at the namespace level.
+  failureReason: |-
+    One or more namespaces are missing Pod Security Standards labels.
+  severity: medium
+  id: namespaces_must_have_pod_security_standards
+  checkType: Platform
+  scannerType: CEL
+  inputs:
+    - name: namespaces
+      kubernetesInputSpec:
+        apiVersion: v1
+        resource: namespaces
+  expression: |
+    namespaces.items.filter(ns,
+      !ns.metadata.name.startsWith('kube-') &&
+      !ns.metadata.name.startsWith('openshift-') &&
+      ns.metadata.name != 'default'
+    ).all(ns,
+      has(ns.metadata.labels) &&
+      ns.metadata.labels.exists(key,
+        key == 'pod-security.kubernetes.io/enforce' ||
+        key == 'pod-security.kubernetes.io/audit' ||
+        key == 'pod-security.kubernetes.io/warn'
+      )
+    )
+

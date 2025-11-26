@@ -1,0 +1,14 @@
+apiVersion: compliance.openshift.io/v1alpha1
+kind: ScanSettingBinding
+metadata:
+  name: demo3-security-scan
+  namespace: openshift-compliance
+profiles:
+  - name: demo3-security-checks
+    kind: TailoredProfile
+    apiGroup: compliance.openshift.io/v1alpha1
+settingsRef:
+  name: default
+  kind: ScanSetting
+  apiGroup: compliance.openshift.io/v1alpha1
+

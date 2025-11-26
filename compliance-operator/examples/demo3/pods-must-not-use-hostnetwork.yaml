@@ -1,0 +1,27 @@
+apiVersion: compliance.openshift.io/v1alpha1
+kind: CustomRule
+metadata:
+  name: pods-must-not-use-hostnetwork
+  namespace: openshift-compliance
+spec:
+  title: Pods must not use hostNetwork
+  description: |-
+    Ensures that pods do not use hostNetwork, which can expose the pod
+    to the host's network stack and create security risks.
+  failureReason: |-
+    One or more pods are using hostNetwork, which is a security risk.
+  severity: high
+  id: pods_must_not_use_hostnetwork
+  checkType: Platform
+  scannerType: CEL
+  inputs:
+    - name: pods
+      kubernetesInputSpec:
+        apiVersion: v1
+        resource: pods
+  expression: |
+    pods.items.all(pod,
+      !has(pod.spec.hostNetwork) ||
+      pod.spec.hostNetwork == false
+    )
+

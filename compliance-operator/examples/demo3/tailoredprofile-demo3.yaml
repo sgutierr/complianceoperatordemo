@@ -1,0 +1,37 @@
+apiVersion: compliance.openshift.io/v1alpha1
+kind: TailoredProfile
+metadata:
+  name: demo3-security-checks
+  namespace: openshift-compliance
+spec:
+  title: Demo 3 - Additional Security Checks
+  description: Custom security checks for container and pod security best practices
+  enableRules:
+    - name: no-latest-image-tag
+      kind: CustomRule
+      rationale: Prevent unpredictable deployments by avoiding latest tags
+    - name: pods-must-have-resource-limits
+      kind: CustomRule
+      rationale: Ensure fair resource allocation and prevent resource exhaustion
+    - name: pods-must-not-run-as-root
+      kind: CustomRule
+      rationale: Follow principle of least privilege
+    - name: secrets-must-not-be-in-env-vars
+      kind: CustomRule
+      rationale: Prevent secret exposure in environment variables
+    - name: critical-namespaces-must-have-networkpolicy
+      kind: CustomRule
+      rationale: Enforce network segmentation for critical namespaces
+    - name: pods-must-have-readiness-probe
+      kind: CustomRule
+      rationale: Ensure proper traffic routing and health checks
+    - name: pods-must-not-use-hostnetwork
+      kind: CustomRule
+      rationale: Prevent exposure to host network stack
+    - name: pods-must-not-use-privileged
+      kind: CustomRule
+      rationale: Prevent privileged container execution
+    - name: namespaces-must-have-pod-security-standards
+      kind: CustomRule
+      rationale: Enforce Pod Security Standards at namespace level
+

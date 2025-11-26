@@ -1,0 +1,33 @@
+apiVersion: compliance.openshift.io/v1alpha1
+kind: CustomRule
+metadata:
+  name: no-latest-image-tag
+  namespace: openshift-compliance
+spec:
+  title: Pods must not use 'latest' image tag
+  description: |-
+    Ensures that pods do not use the 'latest' tag for container images,
+    as it can lead to unpredictable deployments and security vulnerabilities.
+  failureReason: |-
+    One or more pods are using the 'latest' tag for container images.
+  severity: medium
+  id: no_latest_image_tag
+  checkType: Platform
+  scannerType: CEL
+  inputs:
+    - name: pods
+      kubernetesInputSpec:
+        apiVersion: v1
+        resource: pods
+  expression: |
+    pods.items.all(pod,
+      pod.spec.containers.all(container,
+        !container.image.endsWith(':latest') &&
+        !container.image.matches('^[^:]+$')
+      ) &&
+      pod.spec.initContainers.all(container,
+        !container.image.endsWith(':latest') &&
+        !container.image.matches('^[^:]+$')
+      )
+    )
+
