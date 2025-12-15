@@ -4,7 +4,7 @@ metadata:
     name: demo1-security-scan
     namespace: openshift-compliance
 profiles:
-    - name: custom-security-checks
+    - name: demo1-custom-security-checks
       kind: TailoredProfile
       apiGroup: compliance.openshift.io/v1alpha1
 settingsRef:
