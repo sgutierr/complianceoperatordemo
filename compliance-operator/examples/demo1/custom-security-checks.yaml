@@ -5,9 +5,7 @@ metadata:
   namespace: openshift-compliance
 spec:
   title: Demo 1 - Custom Security Checks
-  description: |-
-    Custom security checks for cluster administration, registry configuration,
-    and shadow database detection. Includes CIS 5.1.1 alignment for cluster-admin access.
+  description:  Custom security checks for cluster administration, registry configuration, and shadow database detection. Includes CIS 5.1.1 alignment for cluster-admin access.
   enableRules:
     - name: cluster-admin-allow-list
       kind: CustomRule
@@ -18,4 +16,3 @@ spec:
     - name: disallow-shadow-databases
       kind: CustomRule
       rationale: Prevent application teams from deploying unapproved database instances
-
