@@ -1,7 +1,7 @@
 apiVersion: compliance.openshift.io/v1alpha1
 kind: ScanSettingBinding
 metadata:
-    name: custom-security-scan
+    name: demo1-security-scan
     namespace: openshift-compliance
 profiles:
     - name: custom-security-checks

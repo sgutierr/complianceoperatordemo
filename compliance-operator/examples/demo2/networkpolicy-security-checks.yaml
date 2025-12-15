@@ -1,10 +1,10 @@
 apiVersion: compliance.openshift.io/v1alpha1
 kind: TailoredProfile
 metadata:
-    name: networkpolicy-security-checks
+    name: demo2-networkpolicy-security-checks
     namespace: openshift-compliance
 spec:
-    title: NetworkPolicy Security Checks
+    title: Demo 2 - NetworkPolicy Security Checks
     description: Custom checks enforcing NetworkPolicy standards for labeled namespaces
     enableRules:
         - name: netpol-disallow-allow-all-in-labeled-namespaces

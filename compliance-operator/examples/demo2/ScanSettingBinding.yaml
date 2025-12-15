@@ -1,10 +1,10 @@
 apiVersion: compliance.openshift.io/v1alpha1
 kind: ScanSettingBinding
 metadata:
-    name: networkpolicy-security-scan
+    name: demo2-networkpolicy-scan
     namespace: openshift-compliance
 profiles:
-    - name: networkpolicy-security-checks
+    - name: demo2-networkpolicy-security-checks
       kind: TailoredProfile
       apiGroup: compliance.openshift.io/v1alpha1
 settingsRef:

@@ -4,4 +4,5 @@ kind: Kustomization
 resources:
   - compliance-operator-installation.yaml
   - compliance-operator-examples.yaml
+  - argocd-rbac.yaml
 

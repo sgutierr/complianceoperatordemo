@@ -1,0 +1,40 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: argocd-compliance-operator-manager
+  namespace: openshift-compliance
+rules:
+  - apiGroups:
+      - compliance.openshift.io
+    resources:
+      - customrules
+      - tailoredprofiles
+      - scansettingbindings
+      - compliancescans
+      - compliancesuites
+      - compliancecheckresults
+      - complianceremediations
+      - scanbindings
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: argocd-compliance-operator-manager
+  namespace: openshift-compliance
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: argocd-compliance-operator-manager
+subjects:
+  - kind: ServiceAccount
+    name: openshift-gitops-argocd-application-controller
+    namespace: openshift-gitops
+
