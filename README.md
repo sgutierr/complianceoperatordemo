@@ -1,134 +1,134 @@
 # Compliance Operator Demo
 
-Este repositorio contiene ejemplos y configuraciones para el Compliance Operator de OpenShift, incluyendo instalación mediante ArgoCD y múltiples demos con CustomRules personalizados para diferentes escenarios de seguridad y cumplimiento.
+This repository contains examples and configurations for the OpenShift Compliance Operator, including installation via ArgoCD and multiple demos with custom CustomRules for different security and compliance scenarios.
 
-## 📋 Tabla de Contenidos
+## 📋 Table of Contents
 
-- [Descripción General](#descripción-general)
-- [Estructura del Repositorio](#estructura-del-repositorio)
-- [Instalación](#instalación)
-- [Ejemplos y Demos](#ejemplos-y-demos)
-- [Referencias](#referencias)
+- [Overview](#overview)
+- [Repository Structure](#repository-structure)
+- [Installation](#installation)
+- [Examples and Demos](#examples-and-demos)
+- [References](#references)
 
-## Descripción General
+## Overview
 
-El Compliance Operator de OpenShift permite automatizar el escaneo de cumplimiento y la remediación de problemas de seguridad en clústeres de Kubernetes/OpenShift. Este repositorio proporciona:
+The OpenShift Compliance Operator enables automated compliance scanning and remediation of security issues in Kubernetes/OpenShift clusters. This repository provides:
 
-- **Instalación automatizada** mediante ArgoCD
-- **Ejemplos prácticos** de CustomRules para diferentes escenarios de seguridad
-- **Configuraciones listas para usar** de TailoredProfiles y ScanSettingBindings
-- **Demos progresivos** desde conceptos básicos hasta escaneos CIS completos
+- **Automated installation** via ArgoCD
+- **Practical examples** of CustomRules for different security scenarios
+- **Ready-to-use configurations** for TailoredProfiles and ScanSettingBindings
+- **Progressive demos** from basic concepts to complete CIS scans
 
-## Estructura del Repositorio
+## Repository Structure
 
 ```
 compliance-operator/
-├── examples/              # Ejemplos de CustomRules y configuraciones
-│   ├── demo1/            # Security Checks Básicos
+├── examples/              # CustomRules examples and configurations
+│   ├── demo1/            # Basic Security Checks
 │   ├── demo2/            # NetworkPolicy Security Checks
 │   ├── demo3/            # Container and Pod Security Best Practices
 │   └── demo4/            # CIS Benchmark Compliance Scan
-└── installation/         # Scripts y configuraciones de instalación
-    ├── argocd/           # Aplicaciones de ArgoCD para instalación automatizada
-    └── operator/         # Instalación manual del operador
+└── installation/         # Installation scripts and configurations
+    ├── argocd/           # ArgoCD applications for automated installation
+    └── operator/         # Manual operator installation
 ```
 
-## Instalación
+## Installation
 
-### Opción 1: Instalación mediante ArgoCD (Recomendado)
+### Option 1: Installation via ArgoCD (Recommended)
 
-La instalación mediante ArgoCD permite gestionar el Compliance Operator y sus ejemplos de forma declarativa y automatizada.
+ArgoCD installation allows managing the Compliance Operator and its examples in a declarative and automated way.
 
-#### Prerrequisitos
+#### Prerequisites
 
-- ArgoCD instalado en el clúster
-- Permisos para crear recursos en el namespace `openshift-compliance`
-- Acceso al repositorio Git donde se encuentra este código
+- ArgoCD installed in the cluster
+- Permissions to create resources in the `openshift-compliance` namespace
+- Access to the Git repository where this code is located
 
-#### Pasos de Instalación
+#### Installation Steps
 
-1. **Configurar permisos RBAC** (IMPORTANTE - debe aplicarse primero):
+1. **Configure RBAC permissions** (IMPORTANT - must be applied first):
 
 ```bash
 oc apply -f compliance-operator/installation/argocd/argocd-rbac.yaml
 ```
 
-2. **Aplicar las aplicaciones de ArgoCD**:
+2. **Apply ArgoCD applications**:
 
 ```bash
-# Aplicar aplicación de instalación del operador
+# Apply operator installation application
 oc apply -f compliance-operator/installation/argocd/compliance-operator-installation.yaml
 
-# Aplicar aplicación de ejemplos
+# Apply examples application
 oc apply -f compliance-operator/installation/argocd/compliance-operator-examples.yaml
 ```
 
-3. **Verificar la instalación**:
+3. **Verify the installation**:
 
 ```bash
-# Verificar que el operador esté instalado
+# Verify that the operator is installed
 oc get csv -n openshift-compliance
 
-# Verificar pods del operador
+# Verify operator pods
 oc get pods -n openshift-compliance
 
-# Verificar aplicaciones de ArgoCD
+# Verify ArgoCD applications
 oc get applications -n argocd
 ```
 
-Para más detalles, consulta el [README de ArgoCD](compliance-operator/installation/argocd/Readme.md).
+For more details, see the [ArgoCD README](compliance-operator/installation/argocd/Readme.md).
 
-### Opción 2: Instalación Manual
+### Option 2: Manual Installation
 
-Para instalar el operador manualmente:
+To install the operator manually:
 
 ```bash
-# Crear namespace
+# Create namespace
 oc apply -f compliance-operator/installation/operator/namespace.yaml
 
-# Crear subscription
+# Create subscription
 oc apply -f compliance-operator/installation/operator/susbcription.yaml
 ```
 
-### Configuración del Cliente (oc-compliance plugin)
+### Client Configuration (oc-compliance plugin)
 
-Para usar las utilidades del Compliance Operator desde tu máquina cliente, necesitas instalar el plugin `oc-compliance`:
+To use the Compliance Operator utilities from your client machine, you need to install the `oc-compliance` plugin:
 
 ```bash
-# Instalar podman (si no está disponible)
+# Install podman (if not available)
 sudo yum -y install podman
 
-# Configurar autenticación con Red Hat registry
+# Configure authentication with Red Hat registry
 export REGISTRY_AUTH_PATH=~
 mkdir -p $REGISTRY_AUTH_PATH/containers
 oc get secrets pull-secret -n openshift-config -o template='{{index .data ".dockerconfigjson"}}' | base64 -d > $REGISTRY_AUTH_PATH/containers/rh-pull-secret.json
 
-# Descargar e instalar el plugin
+# Download and install the plugin
 export OC_PATH=$(whereis -b oc | awk '{ print $2 }' | sed 's/\/oc//g')
 podman run --authfile $REGISTRY_AUTH_PATH/containers/rh-pull-secret.json --rm --entrypoint /bin/cat registry.redhat.io/compliance/oc-compliance-rhel8 /usr/bin/oc-compliance > /tmp/oc-compliance && chmod +x /tmp/oc-compliance
 mv /tmp/oc-compliance $OC_PATH/oc-compliance
 
-# Instalar herramientas adicionales para reportes
+# Install additional tools for reports
 sudo yum -y install openscap-scanner tree bzip2
 
-# Verificar instalación
+# Verify installation
 oc compliance --help
 ```
 
-Para más detalles, consulta el [README de instalación](compliance-operator/installation/Readme.md).
+For more details, see the [Installation README](compliance-operator/installation/Readme.md).
 
-## Ejemplos y Demos
+## Examples and Demos
 
-### Demo 1: Security Checks Básicos
+### Demo 1: Basic Security Checks
 
-Este demo incluye verificaciones de seguridad básicas para administración del clúster, configuración de registros y detección de bases de datos no aprobadas.
+This demo includes basic security checks for cluster administration, registry configuration, and detection of unapproved databases.
 
-**CustomRules incluidos:**
-- `cluster-admin-allow-list.yaml`: Audita el acceso cluster-admin contra una lista de permitidos (alineado con CIS 5.1.1)
-- `allowed-registries-configured.yaml`: Verifica que los registros confiables estén definidos en la configuración de imágenes del clúster
-- `disallow-shadow-databases.yaml`: Previene que los equipos de aplicación desplieguen instancias de bases de datos no aprobadas
+**Included CustomRules:**
+- `cluster-admin-allow-list.yaml`: Audits cluster-admin access against an allow-list (aligned with CIS 5.1.1)
+- `allowed-registries-configured.yaml`: Verifies that trusted registries are defined in the cluster image configuration
+- `disallow-shadow-databases.yaml`: Prevents application teams from deploying unapproved database instances
 
-**Aplicar el demo:**
+**Apply the demo:**
 
 ```bash
 oc apply -f compliance-operator/examples/demo1/
@@ -137,13 +137,13 @@ oc apply -f compliance-operator/examples/demo1/custom-security-scan.yaml
 
 ### Demo 2: NetworkPolicy Security Checks
 
-Este demo se enfoca en la seguridad de red mediante NetworkPolicies.
+This demo focuses on network security through NetworkPolicies.
 
-**CustomRules incluidos:**
-- `netpol-disallow-allow-all-in-labeled-namespaces.yaml`: Detecta NetworkPolicies que permiten todo el tráfico en namespaces etiquetados
-- `netpol-require-deny-all-in-labeled-namespaces.yaml`: Requiere una NetworkPolicy que deniegue todo el tráfico en namespaces etiquetados
+**Included CustomRules:**
+- `netpol-disallow-allow-all-in-labeled-namespaces.yaml`: Detects NetworkPolicies that allow all traffic in labeled namespaces
+- `netpol-require-deny-all-in-labeled-namespaces.yaml`: Requires a NetworkPolicy that denies all traffic in labeled namespaces
 
-**Aplicar el demo:**
+**Apply the demo:**
 
 ```bash
 oc apply -f compliance-operator/examples/demo2/
@@ -152,95 +152,95 @@ oc apply -f compliance-operator/examples/demo2/ScanSettingBinding.yaml
 
 ### Demo 3: Container and Pod Security Best Practices
 
-Este demo contiene ejemplos adicionales de CustomRules que cubren mejores prácticas de seguridad para contenedores y pods.
+This demo contains additional CustomRules examples covering security best practices for containers and pods.
 
-**CustomRules incluidos:**
-- `no-latest-image-tag.yaml`: Verifica que los pods no usen la etiqueta 'latest' para imágenes
-- `pods-must-have-resource-limits.yaml`: Asegura que todos los contenedores tengan límites de recursos definidos
-- `pods-must-not-run-as-root.yaml`: Verifica que los contenedores no se ejecuten como root (UID 0)
-- `sec-must-not-be-in-env-vars.yaml`: Asegura que los datos sensibles de Secrets no se expongan como variables de entorno
-- `critical-namespaces-must-have-networkpolicy.yaml`: Verifica que los namespaces críticos tengan NetworkPolicy definida
-- `pods-must-have-readiness-probe.yaml`: Asegura que todos los contenedores tengan readiness probes configurados
-- `pods-must-not-use-hostnetwork.yaml`: Verifica que los pods no usen hostNetwork
-- `pods-must-not-use-privileged.yaml`: Asegura que los contenedores no se ejecuten en modo privilegiado
-- `namespaces-must-have-pod-security-standards.yaml`: Verifica que los namespaces tengan etiquetas de Pod Security Standards
+**Included CustomRules:**
+- `no-latest-image-tag.yaml`: Verifies that pods do not use the 'latest' tag for images
+- `pods-must-have-resource-limits.yaml`: Ensures all containers have defined resource limits
+- `pods-must-not-run-as-root.yaml`: Verifies that containers do not run as root (UID 0)
+- `sec-must-not-be-in-env-vars.yaml`: Ensures sensitive data from Secrets is not exposed as environment variables
+- `critical-namespaces-must-have-networkpolicy.yaml`: Verifies that critical namespaces have NetworkPolicy defined
+- `pods-must-have-readiness-probe.yaml`: Ensures all containers have readiness probes configured
+- `pods-must-not-use-hostnetwork.yaml`: Verifies that pods do not use hostNetwork
+- `pods-must-not-use-privileged.yaml`: Ensures containers do not run in privileged mode
+- `namespaces-must-have-pod-security-standards.yaml`: Verifies that namespaces have Pod Security Standards labels
 
-**Aplicar el demo:**
+**Apply the demo:**
 
 ```bash
-# Aplicar todos los CustomRules
+# Apply all CustomRules
 oc apply -f compliance-operator/examples/demo3/
 
-# Aplicar el TailoredProfile y ScanSettingBinding
+# Apply the TailoredProfile and ScanSettingBinding
 oc apply -f compliance-operator/examples/demo3/tailoredprofile-demo3.yaml
 oc apply -f compliance-operator/examples/demo3/scansettingbinding-demo3.yaml
 
-# Verificar el estado del escaneo
+# Verify scan status
 oc get compliancescans -n openshift-compliance
 oc get compliancecheckresults -n openshift-compliance
 ```
 
-Para más detalles, consulta el [README de Demo 3](compliance-operator/examples/demo3/Readme.md).
+For more details, see the [Demo 3 README](compliance-operator/examples/demo3/Readme.md).
 
 ### Demo 4: CIS Benchmark Compliance Scan
 
-Este demo muestra cómo ejecutar un escaneo de cumplimiento contra el **CIS Red Hat OpenShift Container Platform 4 Benchmark**.
+This demo shows how to run a compliance scan against the **CIS Red Hat OpenShift Container Platform 4 Benchmark**.
 
-**Prerrequisitos:**
+**Prerequisites:**
 - OpenShift cluster
-- Client host configurado con oc-compliance plugin
-- EBS como backend de almacenamiento para soportar un volumen persistente de 1GB
+- Client host configured with oc-compliance plugin
+- EBS as storage backend to support a 1GB persistent volume
 
-**Aplicar el demo:**
+**Apply the demo:**
 
 ```bash
-# Crear el ScanSettingBinding
+# Create the ScanSettingBinding
 oc compliance bind -N ocp4-cis-binding profile/ocp4-cis profile/ocp4-cis-node -n openshift-compliance
 
-# Monitorear el escaneo
+# Monitor the scan
 oc get compliancescan -w -n openshift-compliance
 
-# Ver los resultados
+# View results
 oc get ComplianceCheckResult -n openshift-compliance
 
-# Ver las remediaciones
+# View remediations
 oc get ComplianceRemediation -n openshift-compliance
 
-# Descargar resultados en bruto
+# Download raw results
 mkdir -p ~/compliance-results
 oc compliance fetch-raw scansettingbindings ocp4-cis-binding -o ~/compliance-results/ -n openshift-compliance
 ```
 
-Para más detalles, consulta el [README de Demo 4](compliance-operator/examples/demo4/Readme.md).
+For more details, see the [Demo 4 README](compliance-operator/examples/demo4/Readme.md).
 
-## Verificación y Monitoreo
+## Verification and Monitoring
 
-### Verificar estado de escaneos
+### Verify scan status
 
 ```bash
-# Ver escaneos en ejecución
+# View running scans
 oc get compliancescans -n openshift-compliance
 
-# Ver resultados de verificaciones
+# View verification results
 oc get compliancecheckresults -n openshift-compliance
 
-# Ver remediaciones disponibles
+# View available remediations
 oc get complianceremediations -n openshift-compliance
 ```
 
-### Ver detalles de un resultado específico
+### View details of a specific result
 
 ```bash
-oc compliance view-result <nombre-del-resultado> -n openshift-compliance
+oc compliance view-result <result-name> -n openshift-compliance
 ```
 
-### Descargar resultados en bruto
+### Download raw results
 
 ```bash
-oc compliance fetch-raw scansettingbindings <nombre-binding> -o <directorio-salida> -n openshift-compliance
+oc compliance fetch-raw scansettingbindings <binding-name> -o <output-directory> -n openshift-compliance
 ```
 
-## Referencias
+## References
 
 - [OpenShift Compliance Operator Documentation](https://docs.openshift.com/container-platform/latest/security/compliance_operator/compliance-operator-understanding.html)
 - [Compliance Operator Customization Guide](https://ralvares.github.io/openshift-security-framework/docs/html/compliance-operator-customization.html)
@@ -248,10 +248,10 @@ oc compliance fetch-raw scansettingbindings <nombre-binding> -o <directorio-sali
 - [CIS Benchmarks](https://www.cisecurity.org/cis-benchmarks/)
 - [OpenSCAP Documentation](https://www.open-scap.org/)
 
-## Contribuciones
+## Contributions
 
-Este repositorio contiene ejemplos y configuraciones para el Compliance Operator. Siéntete libre de adaptar estos ejemplos a tus necesidades específicas.
+This repository contains examples and configurations for the Compliance Operator. Feel free to adapt these examples to your specific needs.
 
-## Licencia
+## License
 
-Este repositorio contiene ejemplos y configuraciones de referencia para el Compliance Operator de OpenShift.
+This repository contains reference examples and configurations for the OpenShift Compliance Operator.
